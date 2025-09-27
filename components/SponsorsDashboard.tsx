@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
+import { BottomNavigation } from '@/components/BottomNavigation'
 
 interface SponsorStats {
     sponsoredMissionaries: number
@@ -148,7 +149,7 @@ export function SponsorsDashboard() {
     }
 
     return (
-        <div className="max-w-sm mx-auto bg-white min-h-screen">
+        <div className="w-full bg-white min-h-screen">
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="px-4 py-3 flex items-center justify-between">
@@ -409,32 +410,7 @@ export function SponsorsDashboard() {
             </main>
 
             {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-white border-t border-gray-200 px-4 py-2">
-                <div className="flex items-center justify-around">
-                    <button
-                        onClick={() => router.push('/')}
-                        className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400"
-                    >
-                        <i className="fa-solid fa-home text-lg"></i>
-                        <span className="text-xs">Inicio</span>
-                    </button>
-                    <button className="flex flex-col items-center space-y-1 py-2 px-3 text-beacon-blue">
-                        <i className="fa-solid fa-chart-bar text-lg"></i>
-                        <span className="text-xs font-medium">Dashboard</span>
-                    </button>
-                    <button
-                        onClick={() => router.push('/donations')}
-                        className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400"
-                    >
-                        <i className="fa-solid fa-hand-holding-heart text-lg"></i>
-                        <span className="text-xs">Donaciones</span>
-                    </button>
-                    <button className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400">
-                        <i className="fa-solid fa-user text-lg"></i>
-                        <span className="text-xs">Perfil</span>
-                    </button>
-                </div>
-            </nav>
+            <BottomNavigation />
         </div>
     )
 }

@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { BottomNavigation } from '@/components/BottomNavigation'
 
 interface MonthlyStats {
     lessons: number
@@ -200,7 +201,7 @@ export function ReportsPage() {
     const motivationalMessage = getMotivationalMessage()
 
     return (
-        <div className="max-w-sm mx-auto bg-white min-h-screen">
+        <div className="w-full bg-white min-h-screen">
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="px-4 py-3 flex items-center justify-between">
@@ -223,7 +224,7 @@ export function ReportsPage() {
                 </div>
             </header>
 
-            <main className="pb-20">
+            <main className="pb-20 max-w-4xl mx-auto">
                 {/* Report Header */}
                 <section className="px-4 py-6 bg-gradient-to-br from-beacon-blue to-blue-600">
                     <div className="text-center">
@@ -499,32 +500,7 @@ export function ReportsPage() {
             </main>
 
             {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-white border-t border-gray-200 px-4 py-2">
-                <div className="flex items-center justify-around">
-                    <button
-                        onClick={() => router.push('/')}
-                        className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400"
-                    >
-                        <i className="fa-solid fa-home text-lg"></i>
-                        <span className="text-xs">Inicio</span>
-                    </button>
-                    <button className="flex flex-col items-center space-y-1 py-2 px-3 text-beacon-blue">
-                        <i className="fa-solid fa-chart-bar text-lg"></i>
-                        <span className="text-xs font-medium">Reportes</span>
-                    </button>
-                    <button
-                        onClick={() => router.push('/donations')}
-                        className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400"
-                    >
-                        <i className="fa-solid fa-hand-holding-heart text-lg"></i>
-                        <span className="text-xs">Donaciones</span>
-                    </button>
-                    <button className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400">
-                        <i className="fa-solid fa-user text-lg"></i>
-                        <span className="text-xs">Perfil</span>
-                    </button>
-                </div>
-            </nav>
+            <BottomNavigation />
         </div>
     )
 }

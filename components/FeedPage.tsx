@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { BottomNavigation } from '@/components/BottomNavigation'
+import { ImageModal } from '@/components/ImageModal'
 
 interface FeedPost {
     id: string
@@ -71,18 +73,22 @@ const mockPosts: FeedPost[] = [
 
 export function FeedPage() {
     const [posts, setPosts] = useState<FeedPost[]>(mockPosts)
+    const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
     const router = useRouter()
 
-    const handleLike = (postId: string) => {
-        setPosts(posts.map(post =>
-            post.id === postId
-                ? { ...post, likes: post.likes + 1 }
-                : post
-        ))
+    const handleImageClick = (post: FeedPost) => {
+        setSelectedPost(post)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setSelectedPost(null)
     }
 
     return (
-        <div className="max-w-sm mx-auto bg-white min-h-screen">
+        <div className="w-full bg-white min-h-screen">
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="px-4 py-3 flex items-center justify-between">
@@ -128,21 +134,32 @@ export function FeedPage() {
                 </section>
 
                 {/* Feed Posts */}
-                <section className="px-4 py-2">
+                <section className="px-4 py-2 max-w-4xl mx-auto">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-dm font-semibold text-lg text-deep-navy">Publicaciones Recientes</h3>
                         <button className="text-beacon-blue text-sm font-medium">Ver todas</button>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {posts.map((post) => (
                             <Card key={post.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                                <div className="aspect-w-16 aspect-h-10">
+                                <div
+                                    className="w-full cursor-pointer group relative overflow-hidden"
+                                    onClick={() => handleImageClick(post)}
+                                >
                                     <img
-                                        className="w-full h-48 object-cover"
+                                        className="w-full h-80 object-cover rounded-lg transition-transform group-hover:scale-105"
                                         src={post.imageUrl}
                                         alt={`Post by ${post.author}`}
                                     />
+                                    {/* Overlay on hover */}
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg flex items-center justify-center">
+                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3">
+                                                <i className="fa-solid fa-expand text-gray-700 text-xl"></i>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <CardContent className="p-4">
                                     <div className="flex items-center space-x-2 mb-3">
@@ -159,20 +176,8 @@ export function FeedPage() {
                                     <p className="text-sm text-gray-700 leading-relaxed mb-3">
                                         {post.content}
                                     </p>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-end">
                                         <span className="text-xs text-gray-500">{post.timeAgo}</span>
-                                        <div className="flex items-center space-x-3">
-                                            <button
-                                                onClick={() => handleLike(post.id)}
-                                                className="text-red-500 flex items-center space-x-1"
-                                            >
-                                                <i className="fa-solid fa-heart text-sm"></i>
-                                                <span className="text-xs">{post.likes}</span>
-                                            </button>
-                                            <button className="text-gray-400">
-                                                <i className="fa-solid fa-share text-sm"></i>
-                                            </button>
-                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -239,32 +244,20 @@ export function FeedPage() {
             </main>
 
             {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-white border-t border-gray-200 px-4 py-2">
-                <div className="flex items-center justify-around">
-                    <button className="flex flex-col items-center space-y-1 py-2 px-3 text-beacon-blue">
-                        <i className="fa-solid fa-home text-lg"></i>
-                        <span className="text-xs font-medium">Inicio</span>
-                    </button>
-                    <button
-                        onClick={() => router.push('/reports')}
-                        className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400"
-                    >
-                        <i className="fa-solid fa-chart-bar text-lg"></i>
-                        <span className="text-xs">Reportes</span>
-                    </button>
-                    <button
-                        onClick={() => router.push('/donations')}
-                        className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400"
-                    >
-                        <i className="fa-solid fa-hand-holding-heart text-lg"></i>
-                        <span className="text-xs">Donaciones</span>
-                    </button>
-                    <button className="flex flex-col items-center space-y-1 py-2 px-3 text-gray-400">
-                        <i className="fa-solid fa-user text-lg"></i>
-                        <span className="text-xs">Perfil</span>
-                    </button>
-                </div>
-            </nav>
+            <BottomNavigation />
+
+            {/* Image Modal */}
+            {selectedPost && (
+                <ImageModal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    imageUrl={selectedPost.imageUrl}
+                    author={selectedPost.author}
+                    location={selectedPost.location}
+                    content={selectedPost.content}
+                    timeAgo={selectedPost.timeAgo}
+                />
+            )}
         </div>
     )
 }
