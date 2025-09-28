@@ -1,23 +1,65 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { BottomNavigation } from '@/components/BottomNavigation'
+import { signOut } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 export function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: false,
-    weekly: true,
-    monthly: true,
-    achievements: true,
-    donations: true
-  })
+    const [isEditing, setIsEditing] = useState(false)
+    const [notifications, setNotifications] = useState({
+        email: true,
+        push: false,
+        weekly: true,
+        monthly: true,
+        achievements: true,
+        donations: true
+    })
+    const router = useRouter()
+
+    // Funciones para los botones de acciones
+    const handleExportData = () => {
+        console.log('Exportando datos...')
+        // Aquí se implementaría la lógica de exportación
+        alert('Función de exportación en desarrollo')
+    }
+
+    const handleDownloadHistory = () => {
+        console.log('Descargando historial...')
+        // Aquí se implementaría la descarga del historial
+        alert('Función de descarga en desarrollo')
+    }
+
+    const handleHelpCenter = () => {
+        console.log('Abriendo centro de ayuda...')
+        // Aquí se abriría el centro de ayuda
+        alert('Centro de ayuda en desarrollo')
+    }
+
+    const handleContactSupport = () => {
+        console.log('Contactando soporte...')
+        // Aquí se abriría el formulario de contacto
+        alert('Función de contacto en desarrollo')
+    }
+
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth)
+            console.log('Usuario cerrado sesión')
+            router.push('/login')
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error)
+            alert('Error al cerrar sesión')
+        }
+    }
+
+    // Datos del usuario (simulados)
 
     // Datos del usuario (simulados)
     const userData = {
@@ -47,10 +89,10 @@ export function ProfilePage() {
         console.log('Perfil guardado')
     }
 
-  const handleCancel = () => {
-    setIsEditing(false)
-    // Aquí se restaurarían los valores originales
-  }
+    const handleCancel = () => {
+        setIsEditing(false)
+        // Aquí se restaurarían los valores originales
+    }
 
 
     const getRoleBadge = (role: string) => {
@@ -374,27 +416,47 @@ export function ProfilePage() {
                         </div>
 
                         <div className="space-y-3">
-                            <Button variant="outline" className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+                                onClick={handleExportData}
+                            >
                                 <i className="fa-solid fa-download mr-3"></i>
                                 Exportar Mis Datos
                             </Button>
 
-                            <Button variant="outline" className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+                                onClick={handleDownloadHistory}
+                            >
                                 <i className="fa-solid fa-file-export mr-3"></i>
                                 Descargar Historial de Donaciones
                             </Button>
 
-                            <Button variant="outline" className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+                                onClick={handleHelpCenter}
+                            >
                                 <i className="fa-solid fa-question-circle mr-3"></i>
                                 Centro de Ayuda
                             </Button>
 
-                            <Button variant="outline" className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+                                onClick={handleContactSupport}
+                            >
                                 <i className="fa-solid fa-headset mr-3"></i>
                                 Contactar Soporte
                             </Button>
 
-                            <Button variant="outline" className="w-full justify-start border-red-300 text-red-600 hover:bg-red-50">
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start border-red-300 text-red-600 hover:bg-red-50"
+                                onClick={handleSignOut}
+                            >
                                 <i className="fa-solid fa-sign-out-alt mr-3"></i>
                                 Cerrar Sesión
                             </Button>

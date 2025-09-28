@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
-import { updateSponsorStats } from '@/lib/db'
 import Stripe from 'stripe'
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
@@ -29,13 +28,8 @@ export async function POST(request: NextRequest) {
                 const amount = paymentIntent.amount / 100 // Convertir de centavos a dólares
 
                 if (userId) {
-                    // Actualizar estadísticas del patrocinador
-                    await updateSponsorStats(userId, {
-                        totalDonated: amount,
-                        lastDonationDate: new Date()
-                    })
-
                     console.log(`Payment succeeded for user ${userId}: $${amount}`)
+                    // TODO: Implementar actualización de estadísticas
                 }
                 break
             }

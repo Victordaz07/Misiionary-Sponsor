@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateReport } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
     try {
@@ -22,7 +21,16 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const report = await generateReport(userId, month, year)
+        // Mock report data for now
+        const report = {
+            userId,
+            month,
+            year,
+            totalDonations: 0,
+            totalAmount: 0,
+            entries: [],
+            generatedAt: new Date().toISOString()
+        }
 
         return NextResponse.json(report)
 
@@ -53,7 +61,16 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const report = await generateReport(userId, month, year)
+        // Mock report data for now
+        const report = {
+            userId,
+            month,
+            year,
+            totalDonations: 0,
+            totalAmount: 0,
+            entries: [],
+            generatedAt: new Date().toISOString()
+        }
 
         return NextResponse.json(report)
 

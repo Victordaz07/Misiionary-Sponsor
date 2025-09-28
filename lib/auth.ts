@@ -1,70 +1,107 @@
 import {
-    signInWithEmailLink,
     sendSignInLinkToEmail,
+    signInWithEmailLink,
     isSignInWithEmailLink,
-    signOut,
-    onAuthStateChanged,
     User
 } from 'firebase/auth'
 import { auth } from './firebase'
 
+// Configuración para el magic link
 const actionCodeSettings = {
-    // URL you want to redirect back to. The domain (www.example.com) for this
-    // URL must be in the authorized domains list in the Firebase Console.
+    // URL a la que se redirige después del login
     url: process.env.NODE_ENV === 'production'
-        ? 'https://your-domain.com/auth/callback'
-        : 'http://localhost:3000/auth/callback',
-    // This must be true.
+        ? 'https://tu-dominio.vercel.app/auth/callback'
+        : 'http://localhost:3001/auth/callback',
+    // Dominio que maneja el link
     handleCodeInApp: true,
 }
 
-export const sendMagicLink = async (email: string): Promise<void> => {
+/**
+ * Envía un magic link al email proporcionado
+ * @param email - Email del usuario
+ * @returns Promise<boolean> - true si se envió correctamente
+ */
+export async function sendMagicLink(email: string): Promise<boolean> {
     try {
-        await sendSignInLinkToEmail(auth, email, actionCodeSettings)
-        // Save the email locally so you don't need to ask the user for it again
-        // if they open the link on the same device.
-        window.localStorage.setItem('emailForSignIn', email)
-    } catch (error) {
-        console.error('Error sending magic link:', error)
-        throw error
-    }
-}
-
-export const signInWithMagicLink = async (): Promise<User | null> => {
-    try {
-        if (isSignInWithEmailLink(auth, window.location.href)) {
-            // Get the email if available. This should be available if the user completes
-            // the flow on the same device where they started it.
-            let email = window.localStorage.getItem('emailForSignIn')
-            if (!email) {
-                // User opened the link on a different device. To prevent session fixation
-                // attacks, ask the user to provide the associated email again.
-                email = window.prompt('Please provide your email for confirmation')
-            }
-
-            if (email) {
-                const result = await signInWithEmailLink(auth, email, window.location.href)
-                // Clear email from storage.
-                window.localStorage.removeItem('emailForSignIn')
-                return result.user
-            }
+        // Validar email
+        if (!email || !email.includes('@')) {
+            throw new Error('Email inválido')
         }
-        return null
+
+        // Enviar magic link
+        await sendSignInLinkToEmail(auth, email, actionCodeSettings)
+
+        // Guardar email en localStorage para completar el login
+        localStorage.setItem('emailForSignIn', email)
+
+        console.log('✅ Magic link enviado a:', email)
+        return true
+
     } catch (error) {
-        console.error('Error signing in with magic link:', error)
+        console.error('❌ Error enviando magic link:', error)
         throw error
     }
 }
 
-export const signOutUser = async (): Promise<void> => {
+/**
+ * Completa el login con el magic link
+ * @param email - Email del usuario (opcional, se obtiene de localStorage si no se proporciona)
+ * @returns Promise<User> - Usuario autenticado
+ */
+export async function completeMagicLinkSignIn(email?: string): Promise<User> {
     try {
-        await signOut(auth)
+        // Verificar que estamos en un magic link
+        if (!isSignInWithEmailLink(auth, window.location.href)) {
+            throw new Error('No es un magic link válido')
+        }
+
+        // Obtener email del localStorage si no se proporciona
+        const emailToUse = email || localStorage.getItem('emailForSignIn')
+
+        if (!emailToUse) {
+            throw new Error('No se encontró email para completar el login')
+        }
+
+        // Completar el login
+        const result = await signInWithEmailLink(auth, emailToUse, window.location.href)
+
+        // Limpiar localStorage
+        localStorage.removeItem('emailForSignIn')
+
+        console.log('✅ Login completado para:', result.user.email)
+        return result.user
+
     } catch (error) {
-        console.error('Error signing out:', error)
+        console.error('❌ Error completando login:', error)
         throw error
     }
 }
 
-export const onAuthStateChange = (callback: (user: User | null) => void) => {
-    return onAuthStateChanged(auth, callback)
+/**
+ * Verifica si el usuario está autenticado
+ * @returns boolean
+ */
+export function isUserAuthenticated(): boolean {
+    return !!auth.currentUser
+}
+
+/**
+ * Obtiene el usuario actual
+ * @returns User | null
+ */
+export function getCurrentUser(): User | null {
+    return auth.currentUser
+}
+
+/**
+ * Cierra la sesión del usuario
+ */
+export async function signOut(): Promise<void> {
+    try {
+        await auth.signOut()
+        console.log('✅ Usuario deslogueado')
+    } catch (error) {
+        console.error('❌ Error cerrando sesión:', error)
+        throw error
+    }
 }

@@ -1,7 +1,7 @@
 'use client'
 
-import { LoginForm } from '@/components/LoginForm'
+import { LoginPage } from '@/components/LoginPage'
 
-export default function LoginPage() {
-    return <LoginForm />
+export default function Login() {
+    return <LoginPage />
 }

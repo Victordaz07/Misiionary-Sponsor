@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
-import { addDonation, updateSponsorStats } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
     try {
@@ -33,19 +32,8 @@ export async function POST(request: NextRequest) {
             },
         })
 
-        // Guardar la donación en la base de datos como pendiente
-        const donationId = await addDonation({
-            userId,
-            amount,
-            currency: 'usd',
-            status: 'pending',
-            stripePaymentIntentId: paymentIntent.id,
-            description: description || 'Donación para misiones'
-        })
-
         return NextResponse.json({
-            clientSecret: paymentIntent.client_secret,
-            donationId
+            clientSecret: paymentIntent.client_secret
         })
 
     } catch (error) {

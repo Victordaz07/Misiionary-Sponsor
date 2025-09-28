@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { ImageModal } from '@/components/ImageModal'
+import { getPublicEntries, PublicEntry } from '@/lib/db'
 
 interface FeedPost {
     id: string
@@ -15,7 +16,6 @@ interface FeedPost {
     imageUrl: string
     avatarUrl: string
     timeAgo: string
-    likes: number
 }
 
 const mockPosts: FeedPost[] = [
@@ -27,7 +27,6 @@ const mockPosts: FeedPost[] = [
         imageUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/2faf5c9908-177a380863e0d8bb7bdd.png',
         avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg',
         timeAgo: 'Hace 2 horas',
-        likes: 12
     },
     {
         id: '2',
@@ -37,7 +36,6 @@ const mockPosts: FeedPost[] = [
         imageUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/b719362464-9c3fe50dbaa943f1cf89.png',
         avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg',
         timeAgo: 'Hace 5 horas',
-        likes: 8
     },
     {
         id: '3',
@@ -47,7 +45,6 @@ const mockPosts: FeedPost[] = [
         imageUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/7046e4dcad-ed30257788fbc572a530.png',
         avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg',
         timeAgo: 'Ayer',
-        likes: 15
     },
     {
         id: '4',
@@ -57,7 +54,6 @@ const mockPosts: FeedPost[] = [
         imageUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/8fcd098a84-18537b579addde3ba09d.png',
         avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg',
         timeAgo: 'Hace 2 días',
-        likes: 22
     },
     {
         id: '5',
@@ -67,15 +63,61 @@ const mockPosts: FeedPost[] = [
         imageUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/bcdf8eeb1c-0d49d85e526071369ca2.png',
         avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg',
         timeAgo: 'Hace 3 días',
-        likes: 18
     }
 ]
 
 export function FeedPage() {
-    const [posts, setPosts] = useState<FeedPost[]>(mockPosts)
+    const [posts, setPosts] = useState<FeedPost[]>([])
     const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState('')
     const router = useRouter()
+
+    // Cargar entradas públicas desde Firebase
+    useEffect(() => {
+        const loadPublicEntries = async () => {
+            try {
+                setIsLoading(true)
+                const publicEntries = await getPublicEntries(20)
+
+                // Convertir entradas de Firebase al formato del feed
+                const feedPosts: FeedPost[] = publicEntries.map((entry: PublicEntry) => ({
+                    id: entry.id || '',
+                    author: entry.authorName || 'Misionero',
+                    location: entry.location || 'Misión',
+                    content: entry.content,
+                    imageUrl: entry.imageUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=300&fit=crop',
+                    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+                    timeAgo: formatTimeAgo(entry.createdAt.toDate())
+                }))
+
+                setPosts(feedPosts)
+            } catch (err) {
+                console.error('Error cargando entradas:', err)
+                setError('Error cargando el feed. Usando datos de ejemplo.')
+                setPosts(mockPosts) // Fallback a datos mock
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        loadPublicEntries()
+    }, [])
+
+    const formatTimeAgo = (date: Date): string => {
+        const now = new Date()
+        const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+
+        if (diffInHours < 1) return 'Hace menos de 1 hora'
+        if (diffInHours < 24) return `Hace ${diffInHours} horas`
+
+        const diffInDays = Math.floor(diffInHours / 24)
+        if (diffInDays < 7) return `Hace ${diffInDays} días`
+
+        const diffInWeeks = Math.floor(diffInDays / 7)
+        return `Hace ${diffInWeeks} semanas`
+    }
 
     const handleImageClick = (post: FeedPost) => {
         setSelectedPost(post)
